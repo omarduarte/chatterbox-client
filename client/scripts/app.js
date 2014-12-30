@@ -1,7 +1,8 @@
 var app = {
   server: 'https://api.parse.com/1/classes/chatterbox',
   username: null,
-  roomname: null
+  roomname: null,
+  roomnames: {}
 };
 
 app.init = function() {
@@ -25,6 +26,18 @@ app.send = function(message) {
     }
   });
 };
+app.clearMessages = function() {
+
+};
+
+app.populateRoomnamesDropdown = function() {
+  var $dropDown = $('.roomnames');
+  $dropDown.children().remove();
+  for (var room in this.roomnames) {
+    var escapedRoom = _.escape(room);
+    $dropDown.append('<option value="' + escapedRoom +'">' + escapedRoom + '</option>');
+  }
+};
 
 app.fetch = function() {
   $('.messages').children().remove();
@@ -32,18 +45,25 @@ app.fetch = function() {
       // always use this url
     url: 'https://api.parse.com/1/classes/chatterbox',
     type: 'GET',
-    data: encodeURIComponent('order=-createdAt'),
+    data: {order: '-createdAt'},
+    // data: encodeURIComponent('order=-createdAt'),
     contentType: 'application/json',
     success: function (data) {
-      console.log(data.results.length);
       for (var i = 0; i < data.results.length; i++) {
+        var result = data.results[i];
+        // Populating Roomnames
+        var roomname =  result.roomname;
+        if (roomname) {
+          this.roomnames[roomname] = roomname;
+        }
+
         var $message = $('<div></div>').appendTo('.messages');
         $message.addClass('message');
-        $('<div></div>').appendTo($message).addClass('username').text(data.results[i].username);
-        $('<div></div>').appendTo($message).addClass('text').text(data.results[i].text);
-        $('<div></div>').appendTo($message).addClass('time').text(data.results[i].updatedAt);
+        $('<div></div>').appendTo($message).addClass('username').text(result.username);
+        $('<div></div>').appendTo($message).addClass('text').text(result.text);
+        $('<div></div>').appendTo($message).addClass('time').text(result.updatedAt);
       }
-    },
+    }.bind(app),
     error: function (data) {
       // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
       console.error('chatterbox: Failed to receive message');
