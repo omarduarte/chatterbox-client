@@ -41,11 +41,16 @@ app.populateRoomnamesDropdown = function() {
 
 app.fetch = function() {
   $('.messages').children().remove();
+  var params = {order: '-createdAt'};
+  if (this.roomname !== null) {
+    params.where = {'roomname': this.roomname};
+  }
+
   $.ajax({
       // always use this url
     url: 'https://api.parse.com/1/classes/chatterbox',
     type: 'GET',
-    data: {order: '-createdAt'},
+    data: params,
     // data: encodeURIComponent('order=-createdAt'),
     contentType: 'application/json',
     success: function (data) {
@@ -63,6 +68,7 @@ app.fetch = function() {
         $('<div></div>').appendTo($message).addClass('text').text(result.text);
         $('<div></div>').appendTo($message).addClass('time').text(result.updatedAt);
       }
+      this.populateRoomnamesDropdown.call(app);
     }.bind(app),
     error: function (data) {
       // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -88,6 +94,13 @@ $( document ).ready(function() {
     };
     app.send(message);
   }.bind(app));
+
+  $('.roomnames').on('change', function(event){
+    app.roomname = $('.roomnames').val();
+    this.fetch();
+    console.log(app.roomname);
+  }.bind(app));
+
 });
 
 //field to type username
