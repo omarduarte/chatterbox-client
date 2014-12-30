@@ -1,11 +1,13 @@
 var app = {
   server: 'https://api.parse.com/1/classes/chatterbox',
   username: null,
-  roomname: null,
-  roomnames: {}
+  roomname: 'No rooms selected',
+  roomnames: {},
+  $dropDown: null
 };
 
 app.init = function() {
+  this.$dropDown = $('.roomnames');
   this.fetch();
   //window.setInterval(this.fetch.bind(app), 1000);
 };
@@ -30,19 +32,37 @@ app.clearMessages = function() {
 
 };
 
+app.appendDropdownItem = function(room) {
+  var $roomname =  $('<option></option>');
+  if (room === this.roomname) {
+    $roomname.attr('selected', 'selected');
+  }
+  $roomname.attr('value',room);
+  $roomname.text(room);
+  $roomname.appendTo(this.$dropDown);
+};
+
 app.populateRoomnamesDropdown = function() {
-  var $dropDown = $('.roomnames');
-  $dropDown.children().remove();
+
+
+  this.$dropDown.children().remove();
+  this.roomnames['No rooms selected'] = 'No rooms selected';
   for (var room in this.roomnames) {
-    var escapedRoom = _.escape(room);
-    $dropDown.append('<option value="' + escapedRoom +'">' + escapedRoom + '</option>');
+    this.appendDropdownItem(room);
+    // var $roomname =  $('<option></option>');
+    // if (room === this.roomname) {
+    //   $roomname.attr('selected', 'selected');
+    // }
+    // $roomname.attr('value',room);
+    // $roomname.text(room);
+    // $roomname.appendTo($dropDown);
   }
 };
 
 app.fetch = function() {
   $('.messages').children().remove();
   var params = {order: '-createdAt'};
-  if (this.roomname !== null) {
+  if (this.roomname !== "No rooms selected") {
     params.where = {'roomname': this.roomname};
   }
 
@@ -68,7 +88,7 @@ app.fetch = function() {
         $('<div></div>').appendTo($message).addClass('text').text(result.text);
         $('<div></div>').appendTo($message).addClass('time').text(result.updatedAt);
       }
-      this.populateRoomnamesDropdown.call(app);
+      this.populateRoomnamesDropdown();
     }.bind(app),
     error: function (data) {
       // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -78,7 +98,7 @@ app.fetch = function() {
 };
 
 
-$( document ).ready(function() {
+$(document).ready(function() {
   app.init();
 
   $('.submit-username').on('click', function(event){
@@ -98,15 +118,18 @@ $( document ).ready(function() {
   $('.roomnames').on('change', function(event){
     app.roomname = $('.roomnames').val();
     this.fetch();
+    this.populateRoomnamesDropdown();
     console.log(app.roomname);
   }.bind(app));
 
 });
 
-//field to type username
-  //store username in app object
-    //var username = $('.set-username').val();
-    //this.username = username;
-//field to type message
-  //store message
-//call send with newly created message object
+// this.roomname === 'string'
+// this.roomnames === 'object'
+
+//
+
+
+
+
+
