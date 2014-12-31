@@ -3,6 +3,7 @@ var app = {
   username: null,
   roomname: 'No rooms selected',
   roomnames: {},
+  friendsOf: {},
   $dropDown: null
 };
 
@@ -84,7 +85,7 @@ app.fetch = function() {
 
         var $message = $('<div></div>').appendTo('.messages');
         $message.addClass('message');
-        $('<div></div>').appendTo($message).addClass('username').text(result.username);
+        $('<a href="#"></a>').appendTo($message).addClass('username').text(result.username);
         $('<div></div>').appendTo($message).addClass('text').text(result.text);
         $('<div></div>').appendTo($message).addClass('time').text(result.updatedAt);
       }
@@ -114,6 +115,16 @@ $(document).ready(function() {
     };
     app.send(message);
   }.bind(app));
+
+  $('.messages').on('click','a.username', function(event){
+    if (app.username !== null) {
+      var friend = this.text;
+      if(!app.friendsOf.hasOwnProperty(app.username)) {
+        app.friendsOf[app.username] = {};
+      }
+      app.friendsOf[app.username][friend] = friend;
+    }
+  });
 
   $('.roomnames').on('change', function(event){
     app.roomname = $('.roomnames').val();
